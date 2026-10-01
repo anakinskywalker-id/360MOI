@@ -5,11 +5,6 @@
     "hotspots": []
   },
   {
-    "name": "BEDROOM 03",
-    "src": "images/bedroom-03.png",
-    "hotspots": []
-  },
-  {
     "name": "BEDROOM 04",
     "src": "images/bedroom-04.png",
     "hotspots": []
@@ -20,8 +15,38 @@
     "hotspots": []
   },
   {
+    "name": "BEDROOM 03",
+    "src": "images/bedroom-03.png",
+    "hotspots": []
+  },
+  {
     "name": "BEDROOM 02",
     "src": "images/bedroom-02.png",
+    "hotspots": []
+  },
+  {
+    "name": "Livingroom1",
+    "src": "images/livingroom1.png",
+    "hotspots": []
+  },
+  {
+    "name": "Livingroom2",
+    "src": "images/livingroom2.png",
+    "hotspots": []
+  },
+  {
+    "name": "Livingroom3",
+    "src": "images/livingroom3.png",
+    "hotspots": []
+  },
+  {
+    "name": "Livingroom4",
+    "src": "images/livingroom4.png",
+    "hotspots": []
+  },
+  {
+    "name": "Livingroom5",
+    "src": "images/livingroom5.png",
     "hotspots": []
   }
 ]
