@@ -11,7 +11,7 @@
 
   // Alamat Cloudflare Worker Anda (setelah dideploy — lihat PANDUAN-ADMIN.txt).
   // Wajib https://... tanpa garis miring di akhir.
-  var ADMIN_API_BASE = 'https://GANTI-DENGAN-ALAMAT-WORKER-ANDA.workers.dev';
+  var ADMIN_API_BASE = 'https://360moi.area55studio-works.workers.dev';
 
   // =====================================================================
   // DAFTAR SPOT — otomatis diisi dari manifest.json (file terpisah, di
