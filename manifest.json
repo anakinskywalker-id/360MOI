@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "name": "E1",
+    "src": "images/e1.png",
+    "hotspots": []
+  },
+  {
+    "name": "BEDROOM 03",
+    "src": "images/bedroom-03.png",
+    "hotspots": []
+  },
+  {
+    "name": "BEDROOM 04",
+    "src": "images/bedroom-04.png",
+    "hotspots": []
+  },
+  {
+    "name": "BEDROOM 01",
+    "src": "images/bedroom-01.png",
+    "hotspots": []
+  },
+  {
+    "name": "BEDROOM 02",
+    "src": "images/bedroom-02.png",
+    "hotspots": []
+  }
+]
