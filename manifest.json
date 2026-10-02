@@ -1,10 +1,5 @@
 [
   {
-    "name": "E1",
-    "src": "images/e1.png",
-    "hotspots": []
-  },
-  {
     "name": "BEDROOM 04",
     "src": "images/bedroom-04.png",
     "hotspots": []
@@ -47,6 +42,11 @@
   {
     "name": "Livingroom5",
     "src": "images/livingroom5.png",
+    "hotspots": []
+  },
+  {
+    "name": "ALBA MOI   Exterior View",
+    "src": "images/alba-moi-exterior-view.jpg",
     "hotspots": []
   }
 ]
