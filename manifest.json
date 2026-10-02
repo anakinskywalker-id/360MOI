@@ -1,10 +1,5 @@
 [
   {
-    "name": "ALBA MOI   Exterior View",
-    "src": "images/alba-moi-exterior-view.jpg",
-    "hotspots": []
-  },
-  {
     "name": "ALBA MOI   Interior Bedroom View",
     "src": "images/alba-moi-interior-bedroom-view.jpg",
     "hotspots": []
@@ -12,6 +7,11 @@
   {
     "name": "ALBA MOI   Interior Bedroom TV 0n",
     "src": "images/alba-moi-interior-bedroom-tv-0n.jpg",
+    "hotspots": []
+  },
+  {
+    "name": "ALBA MOI   Exterior View",
+    "src": "images/alba-moi-exterior-view.jpg",
     "hotspots": []
   }
 ]
