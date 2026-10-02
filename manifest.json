@@ -3,5 +3,10 @@
     "name": "ALBA MOI   Exterior View",
     "src": "images/alba-moi-exterior-view.jpg",
     "hotspots": []
+  },
+  {
+    "name": "ALBA MOI   Interior Bedroom",
+    "src": "images/alba-moi-interior-bedroom.jpg",
+    "hotspots": []
   }
 ]
