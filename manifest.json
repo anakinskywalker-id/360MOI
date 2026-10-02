@@ -1,57 +1,7 @@
 [
   {
-    "name": "BEDROOM 04",
-    "src": "images/bedroom-04.png",
-    "hotspots": []
-  },
-  {
-    "name": "BEDROOM 01",
-    "src": "images/bedroom-01.png",
-    "hotspots": []
-  },
-  {
-    "name": "BEDROOM 03",
-    "src": "images/bedroom-03.png",
-    "hotspots": []
-  },
-  {
-    "name": "BEDROOM 02",
-    "src": "images/bedroom-02.png",
-    "hotspots": []
-  },
-  {
-    "name": "Livingroom1",
-    "src": "images/livingroom1.png",
-    "hotspots": []
-  },
-  {
-    "name": "Livingroom2",
-    "src": "images/livingroom2.png",
-    "hotspots": []
-  },
-  {
-    "name": "Livingroom3",
-    "src": "images/livingroom3.png",
-    "hotspots": []
-  },
-  {
-    "name": "Livingroom4",
-    "src": "images/livingroom4.png",
-    "hotspots": []
-  },
-  {
-    "name": "Livingroom5",
-    "src": "images/livingroom5.png",
-    "hotspots": []
-  },
-  {
     "name": "ALBA MOI   Exterior View",
     "src": "images/alba-moi-exterior-view.jpg",
-    "hotspots": []
-  },
-  {
-    "name": "ALBA MOI   Interior Bedroom",
-    "src": "images/alba-moi-interior-bedroom.jpg",
     "hotspots": []
   }
 ]
