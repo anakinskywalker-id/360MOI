@@ -13,5 +13,15 @@
     "name": "ALBA MOI   Exterior View",
     "src": "images/alba-moi-exterior-view.jpg",
     "hotspots": []
+  },
+  {
+    "name": "ALBA MOI 360 View Livingroom 01 Upscale",
+    "src": "images/alba-moi-360-view-livingroom-01-upscale.jpg",
+    "hotspots": []
+  },
+  {
+    "name": "ALBA MOI 360 View Livingroom 02 Upscale",
+    "src": "images/alba-moi-360-view-livingroom-02-upscale.jpg",
+    "hotspots": []
   }
 ]
