@@ -13,5 +13,10 @@
     "name": "ALBA MOI   Exterior View",
     "src": "images/alba-moi-exterior-view.jpg",
     "hotspots": []
+  },
+  {
+    "name": "ALBA MOI 360 View Livingroom 01",
+    "src": "images/alba-moi-360-view-livingroom-01.png",
+    "hotspots": []
   }
 ]
