@@ -397,6 +397,7 @@
     var dx = e.clientX - lastX;
     var dy = e.clientY - lastY;
     lastX = e.clientX; lastY = e.clientY;
+    if(gyroEnabled) return; // gyroscope sudah mengendalikan arah pandang
     var sensitivity = 0.0035 * (fov / 90);
     yaw += dx * sensitivity * 60;
     pitch -= dy * sensitivity * 60;
@@ -1503,8 +1504,92 @@
 
   var autoBtn = document.getElementById('autoBtn');
   autoBtn.addEventListener('click', function(){
+    if(gyroEnabled) disableGyro();
     autoRotate = !autoRotate;
     autoBtn.classList.toggle('active', autoRotate);
+  });
+
+  // ---------- Kontrol gyroscope (gerakkan HP untuk melihat sekeliling) ----------
+  var gyroBtn = document.getElementById('gyroBtn');
+  var gyroEnabled = false;
+  var gyroBaseline = null; // { heading, beta, yaw, pitch } — titik nol relatif saat dinyalakan
+  var gyroListenerFn = null;
+
+  function normalizeDeg180(d){
+    d = d % 360;
+    if(d > 180) d -= 360;
+    if(d < -180) d += 360;
+    return d;
+  }
+
+  function handleDeviceOrientation(e){
+    if(e.beta === null || e.beta === undefined) return;
+    // iOS: webkitCompassHeading (0=utara, bertambah searah jarum jam) lebih
+    // stabil daripada alpha. Browser lain: pakai alpha (arahnya terbalik,
+    // makanya dikalikan -1 di bawah).
+    var usingCompassHeading = typeof e.webkitCompassHeading === 'number';
+    var heading = usingCompassHeading ? e.webkitCompassHeading : e.alpha;
+    if(heading === null || heading === undefined) return;
+
+    if(!gyroBaseline){
+      // Event pertama dipakai sebagai "titik nol" — supaya tidak bergantung
+      // pada akurasi kompas asli perangkat, dan posisi HP saat tombol
+      // ditekan menjadi arah pandang saat itu (tidak melompat).
+      gyroBaseline = { heading: heading, beta: e.beta, yaw: yaw, pitch: pitch };
+      return;
+    }
+
+    var deltaHeading = normalizeDeg180(heading - gyroBaseline.heading);
+    var deltaBeta = e.beta - gyroBaseline.beta;
+    var dir = usingCompassHeading ? 1 : -1;
+
+    yaw = gyroBaseline.yaw + deltaHeading * dir;
+    yaw = ((yaw % 360) + 360) % 360;
+    pitch = Math.max(-89, Math.min(89, gyroBaseline.pitch - deltaBeta));
+  }
+
+  function attachGyro(){
+    gyroBaseline = null;
+    gyroListenerFn = handleDeviceOrientation;
+    window.addEventListener('deviceorientation', gyroListenerFn, true);
+    gyroEnabled = true;
+    gyroBtn.classList.add('active');
+    if(autoRotate){ autoRotate = false; autoBtn.classList.remove('active'); }
+  }
+
+  function disableGyro(){
+    if(gyroListenerFn) window.removeEventListener('deviceorientation', gyroListenerFn, true);
+    gyroListenerFn = null;
+    gyroEnabled = false;
+    gyroBaseline = null;
+    if(gyroBtn) gyroBtn.classList.remove('active');
+  }
+
+  if(gyroBtn){
+    gyroBtn.addEventListener('click', function(){
+      if(gyroEnabled){ disableGyro(); return; }
+      if(typeof DeviceOrientationEvent === 'undefined'){
+        alert('Perangkat/browser ini tidak mendukung sensor gerak (gyroscope).');
+        return;
+      }
+      if(typeof DeviceOrientationEvent.requestPermission === 'function'){
+        // iOS Safari: wajib diminta lewat sentuhan pengguna langsung.
+        DeviceOrientationEvent.requestPermission().then(function(state){
+          if(state === 'granted') attachGyro();
+          else alert('Izin sensor gerak ditolak. Aktifkan lewat Pengaturan > Safari > Posisi & Gerakan, lalu coba lagi.');
+        }).catch(function(){
+          alert('Gagal meminta izin sensor gerak di perangkat ini.');
+        });
+      } else {
+        attachGyro();
+      }
+    });
+  }
+
+  // Rotasi layar (potret/lanskap) mengubah referensi sensor — mulai ulang
+  // titik nol supaya pandangan tidak melompat tiba-tiba.
+  window.addEventListener('orientationchange', function(){
+    if(gyroEnabled) gyroBaseline = null;
   });
 
   document.getElementById('fsBtn').addEventListener('click', function(){
