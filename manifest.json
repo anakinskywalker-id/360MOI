@@ -1,15 +1,5 @@
 [
   {
-    "name": "ALBA MOI   Interior Bedroom View",
-    "src": "images/alba-moi-interior-bedroom-view.jpg",
-    "hotspots": []
-  },
-  {
-    "name": "ALBA MOI   Interior Bedroom TV 0n",
-    "src": "images/alba-moi-interior-bedroom-tv-0n.jpg",
-    "hotspots": []
-  },
-  {
     "name": "ALBA MOI   Exterior View",
     "src": "images/alba-moi-exterior-view.jpg",
     "hotspots": []
@@ -32,6 +22,16 @@
   {
     "name": "ALBA MOI 360 View Livingroom 02 TV REV",
     "src": "images/alba-moi-360-view-livingroom-02-tv-rev.png",
+    "hotspots": []
+  },
+  {
+    "name": "ALBA MOI   Interior Bedroom View",
+    "src": "images/alba-moi-interior-bedroom-view.jpg",
+    "hotspots": []
+  },
+  {
+    "name": "ALBA MOI   Interior Bedroom View TV ON",
+    "src": "images/alba-moi-interior-bedroom-view-tv-on.jpg",
     "hotspots": []
   }
 ]
