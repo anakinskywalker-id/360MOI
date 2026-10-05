@@ -1541,7 +1541,7 @@
 
     var deltaHeading = normalizeDeg180(heading - gyroBaseline.heading);
     var deltaBeta = e.beta - gyroBaseline.beta;
-    var dir = usingCompassHeading ? 1 : -1;
+    var dir = usingCompassHeading ? -1 : 1;
 
     yaw = gyroBaseline.yaw + deltaHeading * dir;
     yaw = ((yaw % 360) + 360) % 360;
