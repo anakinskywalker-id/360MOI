@@ -23,5 +23,15 @@
     "name": "ALBA MOI 360 View Livingroom 02 REV",
     "src": "images/alba-moi-360-view-livingroom-02-rev.png",
     "hotspots": []
+  },
+  {
+    "name": "ALBA MOI 360 View Livingroom 01 TV REV",
+    "src": "images/alba-moi-360-view-livingroom-01-tv-rev.png",
+    "hotspots": []
+  },
+  {
+    "name": "ALBA MOI 360 View Livingroom 02 TV REV",
+    "src": "images/alba-moi-360-view-livingroom-02-tv-rev.png",
+    "hotspots": []
   }
 ]
