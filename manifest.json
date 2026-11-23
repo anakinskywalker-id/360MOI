@@ -8,28 +8,7 @@
       "thumbV": 1795397461678,
       "thumbAuto": true,
       "thumbFrom": "images/proyek-1-lebar-7-bedroom-l1-alt-01.png",
-      "scenes": [
-        {
-          "name": "LEBAR 7   BEDROOM L1 ALT 01",
-          "src": "images/proyek-1-lebar-7-bedroom-l1-alt-01.png",
-          "hotspots": []
-        },
-        {
-          "name": "LEBAR 7   BEDROOM L1 ALT 02",
-          "src": "images/proyek-1-lebar-7-bedroom-l1-alt-02.png",
-          "hotspots": []
-        },
-        {
-          "name": "LEBAR 7   BEDROOM L1 ALT 03",
-          "src": "images/proyek-1-lebar-7-bedroom-l1-alt-03.png",
-          "hotspots": []
-        },
-        {
-          "name": "LEBAR 7   BEDROOM L1 ALT 04",
-          "src": "images/proyek-1-lebar-7-bedroom-l1-alt-04.png",
-          "hotspots": []
-        }
-      ]
+      "scenes": []
     }
   ]
 }
