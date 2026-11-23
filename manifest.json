@@ -3,12 +3,58 @@
   "projects": [
     {
       "id": "proyek-1",
-      "title": "CLUSTER WALDEN",
+      "title": "LEBAR 7",
       "thumb": "images/proyek-1-thumb.jpg",
-      "thumbV": 1795397461678,
+      "thumbV": 1795398186148,
       "thumbAuto": true,
-      "thumbFrom": "images/proyek-1-lebar-7-bedroom-l1-alt-01.png",
-      "scenes": []
+      "thumbFrom": "images/proyek-1-br-l1a.png",
+      "scenes": [
+        {
+          "name": "BR L1A",
+          "src": "images/proyek-1-br-l1a.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L1B",
+          "src": "images/proyek-1-br-l1b.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L1C",
+          "src": "images/proyek-1-br-l1c.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L1D",
+          "src": "images/proyek-1-br-l1d.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 A",
+          "src": "images/proyek-1-liv-1-a.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 B",
+          "src": "images/proyek-1-liv-1-b.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 C",
+          "src": "images/proyek-1-liv-1-c.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 D",
+          "src": "images/proyek-1-liv-1-d.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 E",
+          "src": "images/proyek-1-liv-1-e.png",
+          "hotspots": []
+        }
+      ]
     }
   ]
 }
