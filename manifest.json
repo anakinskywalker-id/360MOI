@@ -55,6 +55,76 @@
           "hotspots": []
         }
       ]
+    },
+    {
+      "id": "lebar-8",
+      "title": "LEBAR 8",
+      "thumb": "images/lebar-8-thumb.jpg",
+      "thumbV": 1795403142386,
+      "thumbAuto": true,
+      "thumbFrom": "images/lebar-8-foyer-alt-1.png",
+      "scenes": [
+        {
+          "name": "FOYER ALT 1",
+          "src": "images/lebar-8-foyer-alt-1.png",
+          "hotspots": []
+        },
+        {
+          "name": "FOYER ALT 2",
+          "src": "images/lebar-8-foyer-alt-2.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIB 1",
+          "src": "images/lebar-8-lib-1.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIB 3",
+          "src": "images/lebar-8-lib-3.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIB 2",
+          "src": "images/lebar-8-lib-2.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 A",
+          "src": "images/lebar-8-liv-1-a.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 C",
+          "src": "images/lebar-8-liv-1-c.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 B",
+          "src": "images/lebar-8-liv-1-b.png",
+          "hotspots": []
+        },
+        {
+          "name": "MB 1",
+          "src": "images/lebar-8-mb-1.png",
+          "hotspots": []
+        },
+        {
+          "name": "MB 4",
+          "src": "images/lebar-8-mb-4.png",
+          "hotspots": []
+        },
+        {
+          "name": "MB 3",
+          "src": "images/lebar-8-mb-3.png",
+          "hotspots": []
+        },
+        {
+          "name": "MB 2",
+          "src": "images/lebar-8-mb-2.png",
+          "hotspots": []
+        }
+      ]
     }
   ]
 }
