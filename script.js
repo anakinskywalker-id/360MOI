@@ -14,9 +14,9 @@
   var ADMIN_API_BASE = 'https://360moi.area55studio-works.workers.dev';
 
   // =====================================================================
-  // DAFTAR SPOT — otomatis diisi dari manifest.json (file terpisah, di
-  // folder yang sama dengan index.html) saat halaman dibuka. Admin yang
-  // login dan menekan "Simpan ke GitHub" akan menimpa manifest.json itu
+  // DAFTAR SPOT proyek yang sedang dibuka — otomatis diisi dari
+  // manifest.json (file terpisah, satu folder dengan index.html). Admin
+  // yang login dan menekan "Simpan ke GitHub" menimpa manifest.json itu
   // secara otomatis — TIDAK perlu mengedit script.js ini lagi.
   // =====================================================================
   var SCENE_MANIFEST = [];
@@ -333,10 +333,16 @@
   var zoneLayerState = {}; // "sceneIdx_zoneId" -> { glTex, opacity, target, start, duration }
   var ZONE_FADE_MS = 260;
 
-  function zoneStateKey(sceneIndex, zoneId){ return sceneIndex + '_' + zoneId; }
+  // Kunci memakai id unik per-spot (bukan nomor urut) supaya tetap benar
+  // walaupun urutan daftar spot berubah saat foto selesai diunduh.
+  var sceneUidCounter = 0;
+  function zoneStateKey(scene, zoneId){
+    if(!scene._uid) scene._uid = ++sceneUidCounter;
+    return scene._uid + '_' + zoneId;
+  }
 
-  function setZoneOverlay(sceneIndex, zoneId, source, fadeIn){
-    var key = zoneStateKey(sceneIndex, zoneId);
+  function setZoneOverlay(scene, zoneId, source, fadeIn){
+    var key = zoneStateKey(scene, zoneId);
     var st = zoneLayerState[key];
     if(!st){
       st = { glTex: gl.createTexture(), opacity: 0, fromOpacity: 0, target: 0, start: nowMs(), duration: ZONE_FADE_MS };
@@ -560,7 +566,9 @@
       } else {
         activeVideoEl = null;
       }
-      activeSceneIndex = i;
+      var nowIdx = scenes.indexOf(next);
+      if(nowIdx === -1) return;
+      activeSceneIndex = nowIdx;
       renderScenePanel();
       rebuildHotspotMarkers();
       rebuildZoneMarkers();
@@ -581,7 +589,7 @@
         zone.options.forEach(function(opt){
           if(opt.objectUrl) URL.revokeObjectURL(opt.objectUrl);
         });
-        var key = zoneStateKey(i, zone.id);
+        var key = zoneStateKey(removed, zone.id);
         if(zoneLayerState[key]){
           gl.deleteTexture(zoneLayerState[key].glTex);
           delete zoneLayerState[key];
@@ -758,7 +766,7 @@
           ev.stopPropagation();
           if(confirm('Hapus pilihan "' + opt.label + '"?')){
             if(scene.selection[zone.id] === opt.key){
-              setZoneOverlay(activeSceneIndex, zone.id, null, false);
+              setZoneOverlay(scene, zone.id, null, false);
               scene.selection[zone.id] = zone.options[0].key;
             }
             zone.options.splice(oi, 1);
@@ -782,7 +790,7 @@
       addTile.title = 'Tambah pilihan material baru';
       addTile.addEventListener('click', function(){
         // Direct click → click(): no prompt() in between, so the picker opens reliably.
-        pendingZoneOptionUpload = { sceneIndex: activeSceneIndex, zoneIndex: zoneIndex };
+        pendingZoneOptionUpload = { scene: scene, zoneIndex: zoneIndex };
         zoneFileInput.click();
       });
       zonePopupSwatches.appendChild(addTile);
@@ -790,7 +798,7 @@
       zonePopupDelete.style.display = 'block';
       zonePopupDelete.onclick = function(){
         if(confirm('Hapus zona "' + zone.label + '"? Semua pilihan materialnya ikut terhapus.')){
-          setZoneOverlay(activeSceneIndex, zone.id, null, false);
+          setZoneOverlay(scene, zone.id, null, false);
           scene.materialZones.splice(zoneIndex, 1);
           delete scene.selection[zone.id];
           rebuildZoneMarkers();
@@ -819,7 +827,7 @@
 
     if(optionKey === zone.options[0].key){
       // Back to "Default" — just fade the overlay out, base photo shows through.
-      setZoneOverlay(activeSceneIndex, zone.id, null, false);
+      setZoneOverlay(scene, zone.id, null, false);
       scene.selection[zone.id] = optionKey;
       return;
     }
@@ -830,7 +838,7 @@
     }
 
     var source = (opt.type === 'video' && opt.videoEl) ? opt.videoEl : opt.img;
-    setZoneOverlay(activeSceneIndex, zone.id, source, true);
+    setZoneOverlay(scene, zone.id, source, true);
     scene.selection[zone.id] = optionKey;
   }
 
@@ -844,7 +852,8 @@
     if(!file || !pendingZoneOptionUpload) return;
     var pending = pendingZoneOptionUpload;
     pendingZoneOptionUpload = null;
-    var scene = scenes[pending.sceneIndex];
+    var scene = pending.scene;
+    if(scenes.indexOf(scene) === -1) return;
     var zone = scene.materialZones[pending.zoneIndex];
 
     // Safe to prompt now — the file is already picked, nothing after this
@@ -1079,7 +1088,7 @@
       var baseExt = s.type === 'video' ? '.mp4' : '.jpg';
       var out = {
         name: s.name,
-        src: s.src || ('images/' + slugify(s.name) + baseExt),
+        src: s.src || ('images/' + projectPrefix() + slugify(s.name) + baseExt),
         hotspots: (s.hotspots || []).map(function(h){
           return { lat: Math.round(h.lat * 10) / 10, lon: Math.round(h.lon * 10) / 10, target: h.target };
         })
@@ -1092,7 +1101,7 @@
             options: z.options.map(function(o, oi){
               if(oi === 0) return { key: o.key, label: o.label };
               var ext = o.type === 'video' ? '.mp4' : '.png';
-              return { key: o.key, label: o.label, src: o.src || ('images/' + slugify(s.name) + '-' + slugify(z.label) + '-' + slugify(o.label) + ext) };
+              return { key: o.key, label: o.label, src: o.src || ('images/' + projectPrefix() + slugify(s.name) + '-' + slugify(z.label) + '-' + slugify(o.label) + ext) };
             })
           };
         });
@@ -1102,7 +1111,7 @@
   }
 
   function buildExportText(){
-    return JSON.stringify(buildManifestJSON(), null, 2);
+    return JSON.stringify(buildProjectsManifest(), null, 2);
   }
 
   document.getElementById('exportBtn').addEventListener('click', function(){
@@ -1169,12 +1178,13 @@
       adminKeyBtn.classList.toggle('logged-in', isAdminLoggedIn());
       adminKeyBtn.title = isAdminLoggedIn() ? 'Logout Admin' : 'Login Admin';
     }
+    if(typeof renderProjectsPage === 'function') renderProjectsPage();
   }
 
   if(adminKeyBtn){
     adminKeyBtn.addEventListener('click', function(){
       if(isAdminLoggedIn()){
-        if(confirm('Logout dari mode admin?')){
+        if(confirm(hasUnsavedChanges() ? 'Ada perubahan yang BELUM disimpan, dan tidak bisa disimpan sebelum login lagi. Tetap logout?' : 'Logout dari mode admin?')){
           adminSession = null;
           persistAdminSession();
           applyAdminUI();
@@ -1261,6 +1271,10 @@
   }
 
   function uniquePath(baseNoExt, ext, used){
+    var dirPrefix = 'images/';
+    if(baseNoExt.indexOf(dirPrefix) === 0 && baseNoExt.length > dirPrefix.length + 90){
+      baseNoExt = baseNoExt.slice(0, dirPrefix.length + 90); // batas panjang nama file di Worker
+    }
     var candidate = baseNoExt + '.' + ext;
     var n = 1;
     while(used.has(candidate)){
@@ -1280,7 +1294,7 @@
       if(!scene.src && scene.sourceFile){
         jobs.push({
           sourceFile: scene.sourceFile,
-          makePath: function(used){ return uniquePath('images/' + slugify(scene.name), fileExt(scene.sourceFile, scene.type === 'video' ? 'mp4' : 'jpg'), used); },
+          makePath: function(used){ return uniquePath('images/' + projectPrefix() + slugify(scene.name), fileExt(scene.sourceFile, scene.type === 'video' ? 'mp4' : 'jpg'), used); },
           apply: function(path){ scene.src = path; }
         });
       }
@@ -1289,7 +1303,7 @@
           if(oi === 0 || opt.src || !opt.sourceFile) return;
           jobs.push({
             sourceFile: opt.sourceFile,
-            makePath: function(used){ return uniquePath('images/' + slugify(scene.name) + '-' + slugify(zone.label) + '-' + slugify(opt.label), fileExt(opt.sourceFile, opt.type === 'video' ? 'mp4' : 'png'), used); },
+            makePath: function(used){ return uniquePath('images/' + projectPrefix() + slugify(scene.name) + '-' + slugify(zone.label) + '-' + slugify(opt.label), fileExt(opt.sourceFile, opt.type === 'video' ? 'mp4' : 'png'), used); },
             apply: function(path){ opt.src = path; }
           });
         });
@@ -1298,45 +1312,709 @@
     return jobs;
   }
 
+  // ======================================================================
+  // BANYAK PROYEK — halaman awal berisi kartu-kartu proyek; tiap proyek
+  // punya daftar spot sendiri. Semuanya disimpan di satu manifest.json
+  // (versi 2): { version: 2, projects: [ { id, title, thumb, scenes } ] }
+  // ======================================================================
+  var projectsData = { projects: [] };  // data mentah dari manifest.json
+  var currentProjectId = null;          // null = sedang di halaman daftar proyek
+  var projectLoadToken = 0;             // membatalkan pemuatan proyek lama yang telat selesai
+  var projectSnapshot = null;           // tanda tangan isi proyek terbuka setelah selesai dimuat
+  var savedFiles = new Set();           // semua path file yang dirujuk manifest terakhir
+  var metaDirty = false;                // judul/thumbnail/daftar proyek berubah, belum disimpan
+  var saving = false;
+  var THUMB_W = 640, THUMB_H = 400;
+
+  var stageNode = document.getElementById('stage');
+  var projectsPageEl = null, projectsGridEl = null, projectsEmptyEl = null, projectsAdminBarEl = null;
+  var backBtnEl = null, thumbFileInput = null;
+  var pm = {};            // elemen-elemen modal proyek
+  var projectDraft = null;
+
+  function mk(tag, cls, text){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function projectPrefix(){ return currentProjectId ? currentProjectId + '-' : ''; }
+
+  function findProject(id){
+    for(var i = 0; i < projectsData.projects.length; i++){
+      if(projectsData.projects[i].id === id) return projectsData.projects[i];
+    }
+    return null;
+  }
+
+  // Menerima format lama (array spot langsung) maupun format baru (v2).
+  function normalizeManifest(data){
+    var list = [];
+    if(Array.isArray(data)){
+      if(data.length) list.push({ id: 'proyek-1', title: 'Proyek 1', scenes: data });
+    } else if(data && Array.isArray(data.projects)){
+      list = data.projects;
+    }
+    var seen = {};
+    var out = [];
+    list.forEach(function(p, i){
+      if(!p || typeof p !== 'object') return;
+      var title = (typeof p.title === 'string' && p.title.trim()) ? p.title.trim() : ('Proyek ' + (i + 1));
+      var id = (typeof p.id === 'string' && /^[A-Za-z0-9][A-Za-z0-9_-]{0,60}$/.test(p.id)) ? p.id : slugify(title);
+      var base = id, n = 1;
+      while(seen[id]) id = base + '-' + (++n);
+      seen[id] = true;
+      out.push({
+        id: id, title: title,
+        thumb: (typeof p.thumb === 'string' && p.thumb) ? p.thumb : undefined,
+        thumbV: typeof p.thumbV === 'number' ? p.thumbV : undefined,
+        thumbAuto: p.thumbAuto !== false,
+        thumbFrom: typeof p.thumbFrom === 'string' ? p.thumbFrom : undefined,
+        scenes: Array.isArray(p.scenes) ? p.scenes : []
+      });
+    });
+    return out;
+  }
+
+  // Mengumpulkan path file dari daftar spot — bisa data mentah manifest
+  // maupun objek spot yang hidup di memori (keduanya punya src & materialZones).
+  function addScenePaths(set, sceneList){
+    (sceneList || []).forEach(function(s){
+      if(!s) return;
+      if(typeof s.src === 'string' && s.src) set.add(s.src);
+      (s.materialZones || []).forEach(function(z){
+        ((z && z.options) || []).forEach(function(o){
+          if(o && typeof o.src === 'string' && o.src) set.add(o.src);
+        });
+      });
+    });
+  }
+
+  function collectFileRefs(projects){
+    var set = new Set();
+    projects.forEach(function(p){
+      if(p.thumb) set.add(p.thumb);
+      addScenePaths(set, p.scenes);
+    });
+    return set;
+  }
+
+  // Path yang SUDAH dipakai sekarang (tanpa spot/opsi yang baru ditambahkan
+  // dan belum terupload) — supaya file baru tidak menimpa file yang sedang dipakai.
+  function refsExcludingPending(){
+    var set = new Set();
+    projectsData.projects.forEach(function(p){
+      if(p.thumb) set.add(p.thumb);
+      if(p.id === currentProjectId) addScenePaths(set, scenes);
+      else addScenePaths(set, p.scenes);
+    });
+    return set;
+  }
+
+  function computeOrphans(saved, refs){
+    var out = [];
+    saved.forEach(function(path){
+      if(!refs.has(path) && /^images\//.test(path)) out.push(path);
+    });
+    return out;
+  }
+
+  function buildProjectsManifest(){
+    return {
+      version: 2,
+      projects: projectsData.projects.map(function(p){
+        var o = { id: p.id, title: p.title };
+        if(p.thumb){ o.thumb = p.thumb; if(p.thumbV) o.thumbV = p.thumbV; }
+        o.thumbAuto = p.thumbAuto !== false;
+        if(p.thumbFrom) o.thumbFrom = p.thumbFrom;
+        o.scenes = (p.id === currentProjectId) ? buildManifestJSON() : p.scenes;
+        return o;
+      })
+    };
+  }
+
+  function signature(){ return JSON.stringify(buildManifestJSON()); }
+
+  function maybeTakeSnapshot(){
+    if(projectSnapshot === null && sceneLoadedCount >= SCENE_MANIFEST.length) projectSnapshot = signature();
+  }
+
+  function hasUnsavedChanges(){
+    if(!(MODE_EDITOR && isAdminLoggedIn())) return false;
+    if(metaDirty) return true;
+    if(currentProjectId){
+      if(collectPendingUploads().length) return true;
+      if(projectSnapshot !== null && signature() !== projectSnapshot) return true;
+    }
+    return false;
+  }
+
+  // Memasukkan spot sesuai urutan di manifest (bukan urutan selesai diunduh).
+  function insertSceneOrdered(scene, order){
+    scene._order = order;
+    var pos = scenes.length;
+    for(var k = 0; k < scenes.length; k++){
+      if(scenes[k]._order !== undefined && scenes[k]._order > order){ pos = k; break; }
+    }
+    scenes.splice(pos, 0, scene);
+    if(activeSceneIndex !== -1 && pos <= activeSceneIndex) activeSceneIndex++;
+    return pos;
+  }
+
+  function uniqueProjectId(title){
+    var base = slugify(title).slice(0, 50) || 'proyek';
+    var id = base, n = 1;
+    while(findProject(id)) id = base + '-' + (++n);
+    return id;
+  }
+
+  // ---------- Thumbnail ----------
+  function computeThumbCrop(w, h, aspect){
+    var cw = w * 0.4, ch = cw / aspect;
+    if(ch > h){ ch = h; cw = ch * aspect; }
+    return { sx: (w - cw) / 2, sy: (h - ch) / 2, sw: cw, sh: ch };
+  }
+  function computeCoverCrop(w, h, aspect){
+    if(w / h > aspect){ var sw = h * aspect; return { sx: (w - sw) / 2, sy: 0, sw: sw, sh: h }; }
+    var sh = w / aspect;
+    return { sx: 0, sy: (h - sh) / 2, sw: w, sh: sh };
+  }
+  function sourceSize(src){
+    return { w: src.naturalWidth || src.videoWidth || src.width, h: src.naturalHeight || src.videoHeight || src.height };
+  }
+  function canvasToBlob(canvas, type, quality){
+    return new Promise(function(resolve){ canvas.toBlob(function(b){ resolve(b); }, type, quality); });
+  }
+  function drawToThumbBlob(source, crop){
+    var c = document.createElement('canvas');
+    c.width = THUMB_W; c.height = THUMB_H;
+    var ctx = c.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(source, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, THUMB_W, THUMB_H);
+    return canvasToBlob(c, 'image/jpeg', 0.82);
+  }
+  function loadImageFromUrl(url){
+    return new Promise(function(resolve, reject){
+      var im = new Image();
+      im.onload = function(){ resolve(im); };
+      im.onerror = function(){ reject(new Error('Gagal memuat ' + url)); };
+      im.src = url;
+    });
+  }
+  function processCustomThumb(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = function(){ reject(new Error('Gagal membaca gambar.')); };
+      reader.onload = function(){
+        var im = new Image();
+        im.onerror = function(){ reject(new Error('File itu bukan gambar yang valid.')); };
+        im.onload = function(){
+          var sz = sourceSize(im);
+          drawToThumbBlob(im, computeCoverCrop(sz.w, sz.h, THUMB_W / THUMB_H)).then(function(blob){
+            resolve({ blob: blob, preview: URL.createObjectURL(blob) });
+          });
+        };
+        im.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  function thumbUrl(p){
+    if(p._thumbPreview) return p._thumbPreview;
+    return p.thumb ? (p.thumb + (p.thumbV ? '?v=' + p.thumbV : '')) : '';
+  }
+  function initialOf(title){ return ((title || '').trim().charAt(0) || '?').toUpperCase(); }
+
+  // Thumbnail otomatis: potongan kecil dari tengah foto spot pertama.
+  function autoThumbFor(p){
+    var isCurrent = (p.id === currentProjectId);
+    var firstSrc = isCurrent ? (scenes[0] && scenes[0].src) : (p.scenes[0] && p.scenes[0].src);
+    if(!firstSrc) return Promise.resolve(null);
+    if(p.thumb && p.thumbFrom === firstSrc) return Promise.resolve(null); // sudah sesuai
+    var getSource;
+    if(isCurrent){
+      var s0 = scenes[0];
+      getSource = Promise.resolve((s0.type === 'video' && s0.videoEl) ? s0.videoEl : s0.img);
+    } else {
+      if(VIDEO_EXT.test(firstSrc)) return Promise.resolve(null);
+      getSource = loadImageFromUrl(firstSrc);
+    }
+    return getSource.then(function(src){
+      if(!src) return null;
+      var sz = sourceSize(src);
+      if(!sz.w || !sz.h) return null;
+      return drawToThumbBlob(src, computeThumbCrop(sz.w, sz.h, THUMB_W / THUMB_H)).then(function(blob){
+        return blob ? { blob: blob, from: firstSrc } : null;
+      });
+    }).catch(function(err){ console.warn('Thumbnail otomatis gagal:', err); return null; });
+  }
+
+  function uploadThumb(p, blob, path, from){
+    return fileToBase64(blob).then(function(b64){
+      return githubPutFile(path, b64, 'Thumbnail proyek ' + p.title + ' lewat panel admin');
+    }).then(function(){
+      p.thumb = path; p.thumbV = Date.now(); p.thumbFrom = from;
+      p._thumbBlob = null; p._thumbPreview = null;
+    });
+  }
+
+  // ---------- Halaman daftar proyek ----------
+  function createProjectsUI(){
+    var brandEl = document.getElementById('loadingBrand');
+    var brandText = (brandEl && brandEl.textContent) || 'AREA 55 STUDIO VR INTERACTIVE';
+
+    projectsPageEl = mk('div'); projectsPageEl.id = 'projectsPage';
+    var header = mk('div', 'projects-header');
+    header.appendChild(mk('div', 'projects-brand', brandText));
+    header.appendChild(mk('div', 'projects-subtitle', 'Pilih proyek untuk melihat tur 360°'));
+    projectsAdminBarEl = mk('div'); projectsAdminBarEl.id = 'projectsAdminBar';
+    var landingSave = mk('button', 'btn', 'Simpan ke GitHub'); landingSave.id = 'landingSaveBtn';
+    landingSave.addEventListener('click', saveEverythingToGithub);
+    projectsAdminBarEl.appendChild(landingSave);
+    header.appendChild(projectsAdminBarEl);
+    projectsGridEl = mk('div'); projectsGridEl.id = 'projectsGrid';
+    projectsEmptyEl = mk('div', '', 'Belum ada proyek.'); projectsEmptyEl.id = 'projectsEmpty';
+    projectsPageEl.appendChild(header);
+    projectsPageEl.appendChild(projectsGridEl);
+    projectsPageEl.appendChild(projectsEmptyEl);
+    stageNode.appendChild(projectsPageEl);
+
+    backBtnEl = mk('button', 'btn', '← Semua Proyek'); backBtnEl.id = 'backBtn';
+    backBtnEl.addEventListener('click', leaveProjectInteractive);
+    stageNode.appendChild(backBtnEl);
+
+    // Modal tambah/ubah proyek
+    pm.modal = mk('div'); pm.modal.id = 'projectModal';
+    pm.form = mk('form'); pm.form.id = 'projectModalBox';
+    pm.heading = mk('h3', '', 'Proyek Baru');
+    pm.titleInput = mk('input'); pm.titleInput.type = 'text'; pm.titleInput.maxLength = 60;
+    pm.titleInput.id = 'projectTitleInput';
+    pm.titleInput.placeholder = 'Judul proyek';
+    var thumbRow = mk('div', 'pm-thumbrow');
+    pm.preview = mk('div', 'pm-preview');
+    var thumbSide = mk('div', 'pm-thumbside');
+    pm.status = mk('div', 'pm-status');
+    var thumbBtns = mk('div', 'pm-thumbbtns');
+    pm.pickBtn = mk('button', 'btn', 'Pilih gambar…'); pm.pickBtn.type = 'button';
+    pm.autoBtn = mk('button', 'btn', 'Otomatis'); pm.autoBtn.type = 'button';
+    thumbBtns.appendChild(pm.pickBtn); thumbBtns.appendChild(pm.autoBtn);
+    thumbSide.appendChild(pm.status); thumbSide.appendChild(thumbBtns);
+    thumbRow.appendChild(pm.preview); thumbRow.appendChild(thumbSide);
+    pm.error = mk('div'); pm.error.id = 'projectModalError';
+    var actions = mk('div'); actions.id = 'projectModalActions';
+    pm.cancelBtn = mk('button', 'btn', 'Batal'); pm.cancelBtn.type = 'button';
+    pm.saveBtn = mk('button', 'btn', 'Simpan'); pm.saveBtn.type = 'submit';
+    actions.appendChild(pm.cancelBtn); actions.appendChild(pm.saveBtn);
+    pm.form.appendChild(pm.heading); pm.form.appendChild(pm.titleInput);
+    pm.form.appendChild(thumbRow); pm.form.appendChild(pm.error); pm.form.appendChild(actions);
+    pm.modal.appendChild(pm.form);
+    stageNode.appendChild(pm.modal);
+
+    thumbFileInput = mk('input'); thumbFileInput.type = 'file'; thumbFileInput.accept = 'image/*';
+    thumbFileInput.style.display = 'none';
+    stageNode.appendChild(thumbFileInput);
+
+    // Tombol memanggil .click() LANGSUNG dari klik (tanpa prompt() di antaranya)
+    // supaya jendela pilih file tidak diblokir browser.
+    pm.pickBtn.addEventListener('click', function(){ thumbFileInput.click(); });
+    thumbFileInput.addEventListener('change', function(e){
+      var file = e.target.files && e.target.files[0];
+      thumbFileInput.value = '';
+      if(!file || !projectDraft) return;
+      pm.error.textContent = 'Memproses gambar…';
+      processCustomThumb(file).then(function(res){
+        projectDraft.blob = res.blob; projectDraft.preview = res.preview; projectDraft.thumbAuto = false;
+        pm.error.textContent = '';
+        refreshProjectModalThumb();
+      }).catch(function(err){ pm.error.textContent = err.message; });
+    });
+    pm.autoBtn.addEventListener('click', function(){
+      projectDraft.thumbAuto = true; projectDraft.blob = null; projectDraft.preview = '';
+      refreshProjectModalThumb();
+    });
+    pm.cancelBtn.addEventListener('click', closeProjectModal);
+    pm.form.addEventListener('submit', function(e){ e.preventDefault(); submitProjectModal(); });
+
+    stageNode.classList.add('landing');
+  }
+
+  function refreshProjectModalThumb(){
+    pm.preview.innerHTML = '';
+    if(projectDraft.preview){
+      var img = mk('img'); img.alt = ''; img.src = projectDraft.preview;
+      pm.preview.appendChild(img);
+    } else {
+      pm.preview.appendChild(mk('span', 'project-initial', initialOf(pm.titleInput.value)));
+    }
+    pm.status.textContent = projectDraft.thumbAuto ? 'Otomatis dari foto spot pertama' : 'Gambar kustom';
+    pm.autoBtn.style.display = projectDraft.thumbAuto ? 'none' : '';
+  }
+
+  function openProjectModal(p){
+    projectDraft = {
+      project: p || null,
+      thumbAuto: p ? p.thumbAuto !== false : true,
+      blob: null,
+      preview: p ? thumbUrl(p) : ''
+    };
+    pm.heading.textContent = p ? 'Ubah Proyek' : 'Proyek Baru';
+    pm.titleInput.value = p ? p.title : '';
+    pm.error.textContent = '';
+    refreshProjectModalThumb();
+    pm.modal.classList.add('on');
+    pm.titleInput.focus();
+  }
+
+  function closeProjectModal(){
+    pm.modal.classList.remove('on');
+    projectDraft = null;
+  }
+
+  function submitProjectModal(){
+    var title = pm.titleInput.value.trim();
+    if(!title){ pm.error.textContent = 'Judul proyek wajib diisi.'; return; }
+    var d = projectDraft, p = d.project;
+    if(!p){
+      p = { id: uniqueProjectId(title), title: title, thumbAuto: true, scenes: [] };
+      projectsData.projects.push(p);
+    }
+    p.title = title;
+    if(d.blob){
+      p._thumbBlob = d.blob; p._thumbPreview = d.preview;
+      p.thumbAuto = false; p.thumbFrom = undefined;
+    } else if(d.thumbAuto){
+      if(p.thumbAuto === false){
+        p.thumbAuto = true; p._thumbBlob = null; p._thumbPreview = null; p.thumbFrom = undefined;
+      }
+    } else {
+      p.thumbAuto = false;
+    }
+    metaDirty = true;
+    closeProjectModal();
+    renderProjectsPage();
+    if(p.id === currentProjectId) updateBackBtn();
+  }
+
+  function renderProjectsPage(){
+    if(!projectsGridEl) return;
+    var admin = MODE_EDITOR && isAdminLoggedIn();
+    projectsGridEl.innerHTML = '';
+
+    projectsData.projects.forEach(function(p, i){
+      var card = mk('div', 'project-card');
+      card.tabIndex = 0;
+      card.setAttribute('role', 'button');
+      var thumb = mk('div', 'project-thumb');
+      function showInitial(){
+        thumb.className = 'project-thumb no-img';
+        thumb.innerHTML = '';
+        thumb.appendChild(mk('span', 'project-initial', initialOf(p.title)));
+      }
+      var url = thumbUrl(p);
+      if(url){
+        var img = mk('img'); img.alt = ''; img.loading = 'lazy'; img.src = url;
+        img.addEventListener('error', showInitial);
+        thumb.appendChild(img);
+      } else {
+        showInitial();
+      }
+      card.appendChild(thumb);
+      card.appendChild(mk('div', 'project-title', p.title));
+
+      if(admin){
+        var actions = mk('div', 'project-actions');
+        [
+          ['◀', 'Geser ke kiri', i > 0, function(){ moveProject(i, -1); }],
+          ['▶', 'Geser ke kanan', i < projectsData.projects.length - 1, function(){ moveProject(i, 1); }],
+          ['✎', 'Ubah judul & thumbnail', true, function(){ openProjectModal(p); }],
+          ['✕', 'Hapus proyek', true, function(){ deleteProject(p); }]
+        ].forEach(function(def){
+          if(!def[2]) return;
+          var b = mk('button', 'proj-act', def[0]);
+          b.type = 'button'; b.title = def[1];
+          b.addEventListener('click', function(ev){ ev.stopPropagation(); def[3](); });
+          actions.appendChild(b);
+        });
+        card.appendChild(actions);
+      }
+
+      card.addEventListener('click', function(){ openProject(p.id); });
+      card.addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); openProject(p.id); }
+      });
+      projectsGridEl.appendChild(card);
+    });
+
+    if(admin){
+      var addCard = mk('div', 'project-card add-card', '+ Tambah Proyek');
+      addCard.tabIndex = 0; addCard.setAttribute('role', 'button');
+      addCard.addEventListener('click', function(){ openProjectModal(null); });
+      projectsGridEl.appendChild(addCard);
+    }
+    projectsEmptyEl.style.display = (!projectsData.projects.length && !admin) ? '' : 'none';
+    projectsAdminBarEl.style.display = admin ? 'flex' : 'none';
+  }
+
+  function moveProject(i, dir){
+    var j = i + dir, list = projectsData.projects;
+    if(j < 0 || j >= list.length) return;
+    var tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    metaDirty = true;
+    renderProjectsPage();
+  }
+
+  function deleteProject(p){
+    if(!confirm('Hapus proyek "' + p.title + '"?\n\nSemua spot di dalamnya ikut dihapus dari daftar. File fotonya baru benar-benar dihapus dari GitHub saat Anda menekan "Simpan ke GitHub".')) return;
+    var idx = projectsData.projects.indexOf(p);
+    if(idx !== -1) projectsData.projects.splice(idx, 1);
+    metaDirty = true;
+    renderProjectsPage();
+  }
+
+  function updateBackBtn(){
+    if(!backBtnEl) return;
+    var p = currentProjectId ? findProject(currentProjectId) : null;
+    backBtnEl.textContent = '← Semua Proyek' + (p ? '  ·  ' + p.title : '');
+  }
+
+  // ---------- Membuka / menutup proyek ----------
+  function resetViewerState(){
+    projectLoadToken++;
+    clearTimeout(loadingHideTimer); clearTimeout(loadingFailsafeTimer);
+    transition = null;
+    disableGyro();
+    autoRotate = false;
+    if(autoBtn) autoBtn.classList.remove('active');
+    editMode = false;
+    hotspotBtn.classList.remove('active'); editBanner.classList.remove('on');
+    zoneEditMode = false;
+    zoneBtn.classList.remove('active'); zoneEditBanner.classList.remove('on');
+    canvas.classList.remove('edit-mode');
+    closeZonePopup();
+    playFallbackBtn.classList.remove('on');
+
+    scenes.forEach(function(s){
+      if(s.videoEl){ try{ s.videoEl.pause(); }catch(e){} }
+      if(s.objectUrl) URL.revokeObjectURL(s.objectUrl);
+      (s.materialZones || []).forEach(function(z){
+        var k = zoneStateKey(s, z.id);
+        if(zoneLayerState[k]){ gl.deleteTexture(zoneLayerState[k].glTex); delete zoneLayerState[k]; }
+        z.options.forEach(function(o){
+          if(o.videoEl){ try{ o.videoEl.pause(); }catch(e){} }
+          if(o.objectUrl) URL.revokeObjectURL(o.objectUrl);
+        });
+      });
+    });
+    scenes.length = 0;
+    activeSceneIndex = -1;
+    activeVideoEl = null;
+    uploadTexture(buildPlaceholderTexture());
+    scenePanel.innerHTML = '';
+    hotspotLayer.innerHTML = '';
+    materialZoneLayer.innerHTML = '';
+    yaw = 0; pitch = 0; fov = 90;
+    updateFovReadout();
+    projectSnapshot = null;
+    sceneLoadedCount = 0;
+  }
+
+  function openProject(id, fromRoute){
+    var p = findProject(id);
+    if(!p){ return; }
+    resetViewerState();
+    currentProjectId = id;
+    stageNode.classList.remove('landing');
+    updateBackBtn();
+    SCENE_MANIFEST = p.scenes.slice();
+    var token = projectLoadToken;
+
+    if(!SCENE_MANIFEST.length){
+      hintEl.classList.remove('hidden');
+      hintEl.textContent = (MODE_EDITOR && isAdminLoggedIn())
+        ? 'Proyek ini masih kosong. Klik "+ Tambah Spot" untuk menambahkan foto 360°.'
+        : 'Proyek ini belum memiliki spot.';
+      showLoadingScreen('Membuka proyek…');
+      hideLoadingScreen();
+      projectSnapshot = signature();
+    } else {
+      hintEl.textContent = 'Seret untuk melihat sekeliling · Scroll atau cubit untuk zoom';
+      showLoadingScreen('Memuat "' + (SCENE_MANIFEST[0].name || 'proyek') + '"…');
+      updateLoadingUI();
+      loadingFailsafeTimer = setTimeout(hideLoadingScreen, 25000);
+      preloadManifest(token);
+    }
+    if(!fromRoute && location.hash !== '#/' + id) location.hash = '#/' + id;
+  }
+
+  function closeProject(fromRoute){
+    resetViewerState();
+    currentProjectId = null;
+    SCENE_MANIFEST = [];
+    stageNode.classList.add('landing');
+    hideLoadingScreen();
+    if(!fromRoute && location.hash) history.pushState(null, '', location.pathname + location.search);
+    renderProjectsPage();
+  }
+
+  function leaveProjectInteractive(){
+    if(hasUnsavedChanges() && !confirm('Ada perubahan yang BELUM disimpan di proyek ini. Keluar tanpa menyimpan?')) return;
+    closeProject(false);
+  }
+
+  function routeToHash(id){
+    if(id && findProject(id)){ openProject(id, true); return; }
+    if(currentProjectId) closeProject(true);
+    if(id) history.replaceState(null, '', location.pathname + location.search);
+  }
+
+  window.addEventListener('hashchange', function(){
+    var m = /^#\/([A-Za-z0-9_-]+)$/.exec(location.hash || '');
+    var id = m ? m[1] : null;
+    if(id === currentProjectId) return;
+    if(currentProjectId && hasUnsavedChanges() &&
+       !confirm('Ada perubahan yang BELUM disimpan di proyek ini. Tinggalkan tanpa menyimpan?')){
+      location.hash = '#/' + currentProjectId;
+      return;
+    }
+    routeToHash(id);
+  });
+
+  window.addEventListener('beforeunload', function(e){
+    if(hasUnsavedChanges()){ e.preventDefault(); e.returnValue = ''; return ''; }
+  });
+
+  function loadManifestAndRoute(){
+    fetch('manifest.json', { cache: 'no-store' })
+      .then(function(res){ if(!res.ok) throw new Error('manifest.json tidak ditemukan'); return res.json(); })
+      .catch(function(){ return null; })
+      .then(function(data){
+        projectsData.projects = normalizeManifest(data);
+        savedFiles = collectFileRefs(projectsData.projects);
+        var m = /^#\/([A-Za-z0-9_-]+)$/.exec(location.hash || '');
+        if(m && findProject(m[1])){
+          openProject(m[1], true);
+        } else {
+          hideLoadingScreen();
+          renderProjectsPage();
+          if(location.hash) history.replaceState(null, '', location.pathname + location.search);
+        }
+      });
+  }
+
+  // ---------- Simpan ke GitHub ----------
   function saveEverythingToGithub(){
+    if(saving) return;
     if(!isAdminLoggedIn()){
       alert('Silakan login admin dulu (tombol 🔑).');
       return;
     }
-    var used = new Set();
-    var jobs = collectPendingUploads();
-    var total = jobs.length + 1; // +1 untuk manifest.json
-    var done = 0;
-
-    saveProgressCloseBtn.style.display = 'none';
-    saveProgressText.textContent = 'Menyiapkan (0/' + total + ')…';
-    saveProgressModal.classList.add('on');
-
-    function uploadNext(i){
-      if(i >= jobs.length){
-        saveProgressText.textContent = 'Menyimpan manifest.json (' + total + '/' + total + ')…';
-        var json = JSON.stringify(buildManifestJSON(), null, 2);
-        return fileToBase64(new Blob([json], { type: 'application/json' }))
-          .then(function(b64){ return githubPutFile('manifest.json', b64, 'Update manifest tur 360 lewat panel admin'); })
-          .then(function(){
-            saveProgressText.textContent = 'Selesai! Situs akan menampilkan perubahan dalam 1-2 menit.';
-            saveProgressCloseBtn.style.display = '';
-            renderScenePanel();
-          });
-      }
-      var job = jobs[i];
-      var path = job.makePath(used);
-      saveProgressText.textContent = 'Mengupload ' + path + ' (' + (done + 1) + '/' + total + ')…';
-      return fileToBase64(job.sourceFile).then(function(b64){
-        return githubPutFile(path, b64, 'Upload ' + path + ' lewat panel admin');
-      }).then(function(){
-        job.apply(path);
-        done++;
-        return uploadNext(i + 1);
-      });
+    if(currentProjectId && sceneLoadedCount < SCENE_MANIFEST.length){
+      alert('Spot proyek ini masih dimuat. Tunggu sampai selesai, lalu simpan lagi.');
+      return;
+    }
+    if(currentProjectId){
+      var fromManifest = scenes.filter(function(s){ return s._order !== undefined; }).length;
+      var failedCount = SCENE_MANIFEST.length - fromManifest;
+      if(failedCount > 0 && !confirm(failedCount + ' spot di proyek ini gagal dimuat (file fotonya tidak ditemukan?) dan akan DIHAPUS dari daftar jika Anda menyimpan. Lanjutkan?')) return;
     }
 
-    uploadNext(0).catch(function(err){
+    var preOrphans = computeOrphans(savedFiles, collectFileRefs(buildProjectsManifest().projects));
+    if(preOrphans.length){
+      var names = preOrphans.slice(0, 6).join('\n') + (preOrphans.length > 6 ? '\n…dan ' + (preOrphans.length - 6) + ' file lain' : '');
+      if(!confirm('Penyimpanan ini juga akan MENGHAPUS ' + preOrphans.length + ' file yang tidak dipakai lagi dari GitHub:\n\n' + names + '\n\n(File masih bisa dipulihkan lewat riwayat commit GitHub.) Lanjutkan?')) return;
+    }
+
+    var used = refsExcludingPending();
+    var step = 0;
+    var tasks = [];
+    var finalRefs = null;
+    var deleteSummary = { deleted: 0, failed: [] };
+
+    function setProgress(text){ saveProgressText.textContent = '(' + step + '/' + tasks.length + ') ' + text; }
+
+    collectPendingUploads().forEach(function(job){
+      tasks.push(function(){
+        var path = job.makePath(used);
+        setProgress('Mengupload ' + path + '…');
+        return fileToBase64(job.sourceFile).then(function(b64){
+          return githubPutFile(path, b64, 'Upload ' + path + ' lewat panel admin');
+        }).then(function(){ job.apply(path); });
+      });
+    });
+
+    tasks.push(function(){
+      var chain = Promise.resolve();
+      projectsData.projects.forEach(function(p){
+        chain = chain.then(function(){
+          var path = 'images/' + p.id + '-thumb.jpg';
+          if(p._thumbBlob){
+            setProgress('Mengupload thumbnail "' + p.title + '"…');
+            return uploadThumb(p, p._thumbBlob, path, undefined);
+          }
+          if(p.thumbAuto === false) return null;
+          return autoThumbFor(p).then(function(res){
+            if(!res) return null;
+            setProgress('Membuat thumbnail "' + p.title + '"…');
+            return uploadThumb(p, res.blob, path, res.from);
+          });
+        });
+      });
+      return chain;
+    });
+
+    tasks.push(function(){
+      setProgress('Menyimpan manifest.json…');
+      var manifest = buildProjectsManifest();
+      var json = JSON.stringify(manifest, null, 2);
+      return fileToBase64(new Blob([json], { type: 'application/json' }))
+        .then(function(b64){ return githubPutFile('manifest.json', b64, 'Update manifest tur 360 lewat panel admin'); })
+        .then(function(){
+          manifest.projects.forEach(function(mp){
+            var p = findProject(mp.id);
+            if(p && p.id === currentProjectId) p.scenes = mp.scenes;
+          });
+          finalRefs = collectFileRefs(manifest.projects);
+          metaDirty = false;
+          if(currentProjectId) projectSnapshot = signature();
+        });
+    });
+
+    tasks.push(function(){
+      var orphans = computeOrphans(savedFiles, finalRefs);
+      var chain = Promise.resolve();
+      orphans.forEach(function(path, i){
+        chain = chain.then(function(){
+          setProgress('Menghapus file tidak terpakai ' + (i + 1) + '/' + orphans.length + '…');
+          return adminFetch('/file?path=' + encodeURIComponent(path), { method: 'DELETE' })
+            .then(function(){ deleteSummary.deleted++; })
+            .catch(function(){ deleteSummary.failed.push(path); });
+        });
+      });
+      return chain.then(function(){
+        savedFiles = new Set(finalRefs);
+        deleteSummary.failed.forEach(function(p){ savedFiles.add(p); }); // dicoba lagi di penyimpanan berikutnya
+      });
+    });
+
+    saving = true;
+    saveProgressCloseBtn.style.display = 'none';
+    saveProgressText.textContent = 'Menyiapkan…';
+    saveProgressModal.classList.add('on');
+
+    var chain = Promise.resolve();
+    tasks.forEach(function(t, i){ chain = chain.then(function(){ step = i + 1; return t(); }); });
+    chain.then(function(){
+      saving = false;
+      var msg = 'Selesai! Situs akan menampilkan perubahan dalam 1-2 menit.';
+      if(deleteSummary.deleted) msg += ' ' + deleteSummary.deleted + ' file tidak terpakai dihapus.';
+      if(deleteSummary.failed.length) msg += ' ' + deleteSummary.failed.length + ' file gagal dihapus (akan dicoba lagi di penyimpanan berikutnya).';
+      saveProgressText.textContent = msg;
+      saveProgressCloseBtn.style.display = '';
+      if(currentProjectId) renderScenePanel();
+      renderProjectsPage();
+    }).catch(function(err){
+      saving = false;
       saveProgressText.textContent = 'Gagal: ' + err.message;
       saveProgressCloseBtn.style.display = '';
     });
@@ -1366,38 +2044,32 @@
     loadingPercentEl.textContent = pct + '%';
   }
 
+  var loadingHideTimer = null, loadingFailsafeTimer = null;
+
+  function showLoadingScreen(sub){
+    loadingHidden = false;
+    sceneLoadedCount = 0;
+    clearTimeout(loadingHideTimer); clearTimeout(loadingFailsafeTimer);
+    loadingScreenEl.style.display = '';
+    loadingScreenEl.classList.remove('done');
+    loadingBarFill.style.width = '0%';
+    loadingPercentEl.textContent = '0%';
+    loadingSubEl.textContent = sub || 'Memuat…';
+  }
+
   function hideLoadingScreen(){
     if(loadingHidden) return;
     loadingHidden = true;
+    clearTimeout(loadingFailsafeTimer);
     loadingBarFill.style.width = '100%';
     loadingPercentEl.textContent = '100%';
     loadingSubEl.textContent = 'Menyiapkan tampilan…';
     loadingScreenEl.classList.add('done');
-    setTimeout(function(){ loadingScreenEl.style.display = 'none'; }, 550);
+    loadingHideTimer = setTimeout(function(){ loadingScreenEl.style.display = 'none'; }, 550);
   }
 
-  // manifest.json dimuat lebih dulu (biasanya sepersekian detik), BARU
-  // proses preload foto/video di bawah ini berjalan — supaya daftar spot
-  // yang dipakai selalu yang terbaru, termasuk hasil "Simpan ke GitHub".
-  fetch('manifest.json', { cache: 'no-store' })
-    .then(function(res){ if(!res.ok) throw new Error('manifest.json tidak ditemukan'); return res.json(); })
-    .then(function(data){ startApp(Array.isArray(data) ? data : []); })
-    .catch(function(){ startApp([]); });
-
-  function startApp(manifestData){
-    SCENE_MANIFEST = manifestData;
-
-    if(!SCENE_MANIFEST.length){
-      hideLoadingScreen();
-    } else {
-      loadingSubEl.textContent = 'Memuat "' + SCENE_MANIFEST[0].name + '"…';
-      updateLoadingUI();
-      // Failsafe: never leave a visitor stuck on the loading screen forever
-      // if every file happens to be slow or blocked (e.g. network hiccup).
-      setTimeout(hideLoadingScreen, 25000);
-    }
-    preloadManifest();
-  }
+  // manifest.json dimuat oleh loadManifestAndRoute() (di bagian proyek);
+  // foto/video sebuah proyek baru dimuat saat proyek itu dibuka.
 
   // ---------- Preload fixed manifest (auto scenes for every visitor) ----------
   var VIDEO_EXT = /\.(mp4|webm|ogv|mov)(\?.*)?$/i;
@@ -1433,18 +2105,28 @@
     }
   }
 
-  function preloadManifest(){
+  function preloadManifest(token){
     if(!SCENE_MANIFEST.length) return;
 
-    function loadEntryAsScene(entry, isFirst){
+    function loadEntryAsScene(entry, idx){
+      var isFirst = (idx === 0);
+      // The first scene gets the network to itself so it shows up as fast as
+      // possible; only once it's settled do the remaining spots start loading.
+      function loadRest(){
+        if(isFirst){
+          for(var i = 1; i < SCENE_MANIFEST.length; i++) loadEntryAsScene(SCENE_MANIFEST[i], i);
+        }
+      }
+
       loadMediaEntry(entry.src, 'Default', function(media){
+        if(token !== projectLoadToken) return; // proyek sudah ditutup/diganti
         var scene = {
           name: entry.name,
           thumbSrc: media.thumbSrc, img: media.img, videoEl: media.videoEl,
           src: media.src, type: media.type,
           hotspots: (entry.hotspots || []).slice()
         };
-        scenes.push(scene);
+        insertSceneOrdered(scene, idx);
         initSceneMaterials(scene);
 
         // Material zones (layered): each zone's first option is "Default"
@@ -1472,34 +2154,30 @@
 
         hintEl.classList.add('hidden');
         if(activeSceneIndex === -1){
-          switchScene(scenes.length - 1);
+          switchScene(scenes.indexOf(scene));
           hideLoadingScreen();
         } else {
           renderScenePanel();
         }
         sceneLoadedCount++;
         updateLoadingUI();
-
-        // The first scene gets the network to itself so it shows up as fast
-        // as possible; only once it's ready do the remaining spots (and their
-        // material combinations) start downloading in the background.
-        if(isFirst){
-          for(var i = 1; i < SCENE_MANIFEST.length; i++){
-            loadEntryAsScene(SCENE_MANIFEST[i], false);
-          }
-        }
+        maybeTakeSnapshot();
+        loadRest();
       }, function(){
+        if(token !== projectLoadToken) return;
         sceneLoadedCount++;
         updateLoadingUI();
-        if(isFirst){
-          for(var i = 1; i < SCENE_MANIFEST.length; i++){
-            loadEntryAsScene(SCENE_MANIFEST[i], false);
-          }
+        maybeTakeSnapshot();
+        if(sceneLoadedCount >= SCENE_MANIFEST.length && !scenes.length){
+          hintEl.classList.remove('hidden');
+          hintEl.textContent = 'Foto proyek ini tidak bisa dimuat. Periksa nama file di manifest.json.';
+          hideLoadingScreen();
         }
+        loadRest();
       });
     }
 
-    loadEntryAsScene(SCENE_MANIFEST[0], true);
+    loadEntryAsScene(SCENE_MANIFEST[0], 0);
   }
 
   var autoBtn = document.getElementById('autoBtn');
@@ -1603,6 +2281,7 @@
 
   // ---------- Render loop ----------
   function render(){
+    if(!currentProjectId){ requestAnimationFrame(render); return; } // halaman daftar proyek: tidak perlu menggambar
     if(autoRotate && !dragging){
       yaw = (yaw + 0.08) % 360;
     }
@@ -1658,7 +2337,7 @@
         gl.uniformMatrix4fv(oMVP, false, new Float32Array(mvp));
 
         activeScene.materialZones.forEach(function(zone){
-          var key = zoneStateKey(activeSceneIndex, zone.id);
+          var key = zoneStateKey(activeScene, zone.id);
           var st = zoneLayerState[key];
           if(!st) return;
           var op = tickZoneOpacity(st);
@@ -1682,4 +2361,8 @@
   }
   updateFovReadout();
   requestAnimationFrame(render);
+
+  createProjectsUI();
+  applyAdminUI();
+  loadManifestAndRoute();
 })();
