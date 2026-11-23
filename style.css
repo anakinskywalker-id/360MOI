@@ -604,3 +604,146 @@
   #loadingSub{
     font-family: var(--mono); font-size: 11px; color: var(--text-dim);
   }
+
+  /* ---------- Halaman daftar proyek ---------- */
+  #projectsPage{
+    position:absolute; inset:0; z-index:20;
+    display:none; flex-direction:column; align-items:center;
+    background: var(--bg);
+    overflow-y:auto;
+    padding: 72px 24px 56px;
+  }
+  #stage.landing #projectsPage{ display:flex; }
+  .projects-header{
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    text-align:center; margin-bottom: 34px;
+  }
+  .projects-brand{
+    font-family: var(--mono); font-size: 15px; letter-spacing: 0.2em;
+    color: var(--amber); text-transform: uppercase;
+  }
+  .projects-subtitle{
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: var(--text-dim);
+  }
+  #projectsAdminBar{ display:none; gap:8px; margin-top:8px; }
+  #projectsGrid{
+    width: min(1100px, 100%);
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 18px;
+  }
+  .project-card{
+    position:relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow:hidden;
+    cursor:pointer;
+    outline:none;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .project-card:hover, .project-card:focus-visible{ border-color: var(--amber); transform: translateY(-2px); }
+  .project-thumb{
+    position:relative; width:100%; aspect-ratio: 16 / 10;
+    background:#100e0b; overflow:hidden;
+  }
+  .project-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .project-thumb.no-img{
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, #2b2620, #14120f);
+  }
+  .project-initial{ font-family: var(--mono); font-size: 44px; color: var(--amber-dim); }
+  .project-title{
+    padding: 12px 14px;
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; color: var(--text);
+    border-top: 1px solid var(--line);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .project-actions{ position:absolute; top:8px; right:8px; display:flex; gap:4px; }
+  .proj-act{
+    width:26px; height:26px;
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--text);
+    background: rgba(15,13,10,0.85);
+    border: 1px solid var(--line); border-radius: 3px;
+    cursor:pointer;
+  }
+  .proj-act:hover{ border-color: var(--amber); color: var(--amber); }
+  .add-card{
+    display:flex; align-items:center; justify-content:center;
+    min-height: 190px;
+    border-style: dashed;
+    color: var(--text-dim);
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em;
+  }
+  .add-card:hover{ color: var(--amber); }
+  #projectsEmpty{ margin-top: 40px; font-family: var(--mono); font-size: 13px; color: var(--text-dim); }
+
+  /* Di halaman daftar proyek, seluruh UI viewer disembunyikan */
+  #stage.landing #gl,
+  #stage.landing #topbar,
+  #stage.landing #compass,
+  #stage.landing #controls,
+  #stage.landing #scenePanel,
+  #stage.landing #hotspotLayer,
+  #stage.landing #materialZoneLayer,
+  #stage.landing #zonePopup,
+  #stage.landing #editBanner,
+  #stage.landing #zoneEditBanner,
+  #stage.landing #uiToggleBtn,
+  #stage.landing #playFallbackBtn,
+  #stage.landing #hint{ display:none !important; }
+
+  /* Tombol kembali ke daftar proyek (hanya saat sebuah proyek terbuka) */
+  #backBtn{ display:none; position:absolute; top:44px; left:16px; z-index:30; }
+  #stage:not(.landing) #backBtn{ display:inline-flex; }
+  #stage.ui-hidden #backBtn{ display:none !important; }
+
+  /* Modal tambah/ubah proyek */
+  #projectModal{
+    position:absolute; inset:0;
+    background: rgba(10,9,7,0.82);
+    display:none; align-items:center; justify-content:center;
+    z-index: 40;
+  }
+  #projectModal.on{ display:flex; }
+  #projectModalBox{
+    width: min(380px, 90vw);
+    background: var(--panel);
+    border: 1px solid var(--line); border-radius: 4px;
+    padding: 18px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  #projectModalBox h3{
+    margin:0; font-family: var(--mono); font-size:12px;
+    letter-spacing:0.08em; color: var(--amber); text-transform:uppercase; font-weight:500;
+  }
+  #projectModalBox input[type="text"]{
+    width:100%; background:#100e0b; color: var(--text);
+    border: 1px solid var(--line); border-radius:3px;
+    font-family: var(--sans); font-size: 13px; padding: 9px 10px;
+  }
+  #projectModalBox input[type="text"]:focus{ outline:none; border-color: var(--amber-dim); }
+  .pm-thumbrow{ display:flex; gap:12px; align-items:center; }
+  .pm-preview{
+    width:112px; aspect-ratio:16/10; flex-shrink:0;
+    background: linear-gradient(135deg, #2b2620, #14120f);
+    border: 1px solid var(--line); border-radius:3px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pm-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pm-preview .project-initial{ font-size: 28px; }
+  .pm-thumbside{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .pm-status{ font-family: var(--mono); font-size: 11px; color: var(--text-dim); line-height:1.4; }
+  .pm-thumbbtns{ display:flex; gap:6px; flex-wrap:wrap; }
+  #projectModalError{ font-family: var(--mono); font-size: 11px; color:#c85c4a; min-height: 14px; }
+  #projectModalActions{ display:flex; justify-content:flex-end; gap:8px; }
+
+  @media (max-width: 760px){
+    #projectsPage{ padding: 64px 14px 40px; }
+    #projectsGrid{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .project-title{ font-size: 12px; padding: 10px 11px; }
+    .project-initial{ font-size: 32px; }
+    #backBtn{ top: 40px; left: 10px; }
+  }
