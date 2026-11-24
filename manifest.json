@@ -28,6 +28,26 @@
           "name": "BR L1D",
           "src": "images/proyek-1-br-l1d.png",
           "hotspots": []
+        },
+        {
+          "name": "BR L2 A",
+          "src": "images/proyek-1-br-l2-a.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L2 B",
+          "src": "images/proyek-1-br-l2-b.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L2 C",
+          "src": "images/proyek-1-br-l2-c.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L2 D",
+          "src": "images/proyek-1-br-l2-d.png",
+          "hotspots": []
         }
       ]
     },
