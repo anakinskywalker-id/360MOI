@@ -48,6 +48,46 @@
           "name": "BR L2 D",
           "src": "images/proyek-1-br-l2-d.png",
           "hotspots": []
+        },
+        {
+          "name": "LIV 1 A",
+          "src": "images/proyek-1-liv-1-a.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 B",
+          "src": "images/proyek-1-liv-1-b.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 C",
+          "src": "images/proyek-1-liv-1-c.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 D",
+          "src": "images/proyek-1-liv-1-d.png",
+          "hotspots": []
+        },
+        {
+          "name": "LIV 1 E",
+          "src": "images/proyek-1-liv-1-e.png",
+          "hotspots": []
+        },
+        {
+          "name": "WR L2 A",
+          "src": "images/proyek-1-wr-l2-a.png",
+          "hotspots": []
+        },
+        {
+          "name": "WR L2 C",
+          "src": "images/proyek-1-wr-l2-c.png",
+          "hotspots": []
+        },
+        {
+          "name": "WR L2 B",
+          "src": "images/proyek-1-wr-l2-b.png",
+          "hotspots": []
         }
       ]
     },
