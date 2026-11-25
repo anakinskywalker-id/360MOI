@@ -233,6 +233,21 @@
           "name": "ATTIC3",
           "src": "images/lebar-8-attic3.png",
           "hotspots": []
+        },
+        {
+          "name": "BR L1 A",
+          "src": "images/lebar-8-br-l1-a.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L1 C",
+          "src": "images/lebar-8-br-l1-c.png",
+          "hotspots": []
+        },
+        {
+          "name": "BR L1 B",
+          "src": "images/lebar-8-br-l1-b.png",
+          "hotspots": []
         }
       ]
     }
