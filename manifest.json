@@ -130,25 +130,10 @@
       "id": "lebar-8",
       "title": "LEBAR 8",
       "thumb": "images/lebar-8-thumb.jpg",
-      "thumbV": 1795484891483,
+      "thumbV": 1795589428796,
       "thumbAuto": true,
-      "thumbFrom": "images/lebar-8-foyer-alt-c.png",
+      "thumbFrom": "images/lebar-8-lib-1.png",
       "scenes": [
-        {
-          "name": "FOYER ALT C",
-          "src": "images/lebar-8-foyer-alt-c.png",
-          "hotspots": []
-        },
-        {
-          "name": "FOYER ALT A",
-          "src": "images/lebar-8-foyer-alt-a.png",
-          "hotspots": []
-        },
-        {
-          "name": "FOYER ALT B",
-          "src": "images/lebar-8-foyer-alt-b.png",
-          "hotspots": []
-        },
         {
           "name": "LIB 1",
           "src": "images/lebar-8-lib-1.png",
@@ -247,6 +232,21 @@
         {
           "name": "BR L2 B",
           "src": "images/lebar-8-br-l2-b.png",
+          "hotspots": []
+        },
+        {
+          "name": "FOYER ALT A",
+          "src": "images/lebar-8-foyer-alt-a.png",
+          "hotspots": []
+        },
+        {
+          "name": "FOYER ALT C",
+          "src": "images/lebar-8-foyer-alt-c.png",
+          "hotspots": []
+        },
+        {
+          "name": "FOYER ALT B",
+          "src": "images/lebar-8-foyer-alt-b.png",
           "hotspots": []
         }
       ]
