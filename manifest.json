@@ -213,6 +213,26 @@
           "name": "BR L2 C",
           "src": "images/lebar-8-br-l2-c.png",
           "hotspots": []
+        },
+        {
+          "name": "ATTIC1",
+          "src": "images/lebar-8-attic1.png",
+          "hotspots": []
+        },
+        {
+          "name": "ATTIC4",
+          "src": "images/lebar-8-attic4.png",
+          "hotspots": []
+        },
+        {
+          "name": "ATTIC2",
+          "src": "images/lebar-8-attic2.png",
+          "hotspots": []
+        },
+        {
+          "name": "ATTIC3",
+          "src": "images/lebar-8-attic3.png",
+          "hotspots": []
         }
       ]
     }
