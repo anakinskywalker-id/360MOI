@@ -185,26 +185,6 @@
           "hotspots": []
         },
         {
-          "name": "ATTIC1",
-          "src": "images/lebar-8-attic1.png",
-          "hotspots": []
-        },
-        {
-          "name": "ATTIC4",
-          "src": "images/lebar-8-attic4.png",
-          "hotspots": []
-        },
-        {
-          "name": "ATTIC2",
-          "src": "images/lebar-8-attic2.png",
-          "hotspots": []
-        },
-        {
-          "name": "ATTIC3",
-          "src": "images/lebar-8-attic3.png",
-          "hotspots": []
-        },
-        {
           "name": "BR L1 A",
           "src": "images/lebar-8-br-l1-a.png",
           "hotspots": []
@@ -247,6 +227,26 @@
         {
           "name": "FOYER ALT B",
           "src": "images/lebar-8-foyer-alt-b.png",
+          "hotspots": []
+        },
+        {
+          "name": "ATTIC1",
+          "src": "images/lebar-8-attic1.png",
+          "hotspots": []
+        },
+        {
+          "name": "ATTIC4",
+          "src": "images/lebar-8-attic4.png",
+          "hotspots": []
+        },
+        {
+          "name": "ATTIC2",
+          "src": "images/lebar-8-attic2.png",
+          "hotspots": []
+        },
+        {
+          "name": "ATTIC3",
+          "src": "images/lebar-8-attic3.png",
           "hotspots": []
         }
       ]
