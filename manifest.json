@@ -55,28 +55,8 @@
           "hotspots": []
         },
         {
-          "name": "LIB 3",
-          "src": "images/lebar-8-lib-3.png",
-          "hotspots": []
-        },
-        {
-          "name": "LIB 2",
-          "src": "images/lebar-8-lib-2.png",
-          "hotspots": []
-        },
-        {
           "name": "LIV 1 A",
           "src": "images/lebar-8-liv-1-a.png",
-          "hotspots": []
-        },
-        {
-          "name": "LIV 1 C",
-          "src": "images/lebar-8-liv-1-c.png",
-          "hotspots": []
-        },
-        {
-          "name": "LIV 1 B",
-          "src": "images/lebar-8-liv-1-b.png",
           "hotspots": []
         },
         {
@@ -85,33 +65,8 @@
           "hotspots": []
         },
         {
-          "name": "MB 4",
-          "src": "images/lebar-8-mb-4.png",
-          "hotspots": []
-        },
-        {
-          "name": "MB 3",
-          "src": "images/lebar-8-mb-3.png",
-          "hotspots": []
-        },
-        {
-          "name": "MB 2",
-          "src": "images/lebar-8-mb-2.png",
-          "hotspots": []
-        },
-        {
-          "name": "BR L1 A",
-          "src": "images/lebar-8-br-l1-a.png",
-          "hotspots": []
-        },
-        {
           "name": "BR L1 C",
           "src": "images/lebar-8-br-l1-c.png",
-          "hotspots": []
-        },
-        {
-          "name": "BR L1 B",
-          "src": "images/lebar-8-br-l1-b.png",
           "hotspots": []
         },
         {
@@ -120,48 +75,13 @@
           "hotspots": []
         },
         {
-          "name": "BR L2 C",
-          "src": "images/lebar-8-br-l2-c.png",
-          "hotspots": []
-        },
-        {
-          "name": "BR L2 B",
-          "src": "images/lebar-8-br-l2-b.png",
-          "hotspots": []
-        },
-        {
-          "name": "FOYER ALT A",
-          "src": "images/lebar-8-foyer-alt-a.png",
-          "hotspots": []
-        },
-        {
           "name": "FOYER ALT C",
           "src": "images/lebar-8-foyer-alt-c.png",
           "hotspots": []
         },
         {
-          "name": "FOYER ALT B",
-          "src": "images/lebar-8-foyer-alt-b.png",
-          "hotspots": []
-        },
-        {
           "name": "ATTIC1",
           "src": "images/lebar-8-attic1.png",
-          "hotspots": []
-        },
-        {
-          "name": "ATTIC4",
-          "src": "images/lebar-8-attic4.png",
-          "hotspots": []
-        },
-        {
-          "name": "ATTIC2",
-          "src": "images/lebar-8-attic2.png",
-          "hotspots": []
-        },
-        {
-          "name": "ATTIC3",
-          "src": "images/lebar-8-attic3.png",
           "hotspots": []
         }
       ]
